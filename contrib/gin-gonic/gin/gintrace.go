@@ -52,6 +52,13 @@ func Middleware(service string, opts ...Option) gin.HandlerFunc {
 		}
 		opts = append(opts, tracer.Tag(ext.HTTPRoute, c.FullPath()))
 		opts = append(opts, httptrace.HeaderTagsFromRequest(c.Request, cfg.headerTags))
+		sctx, err := tracer.Extract(tracer.HTTPHeadersCarrier(c.Request.Header))
+		if err != nil {
+			//dont know yet
+		}
+
+		opts = append(opts, tracer.ChildOf(sctx))
+
 		span, ctx, finishSpans := httptrace.StartRequestSpan(c.Request, opts...)
 		defer func() {
 			finishSpans(c.Writer.Status(), nil)
